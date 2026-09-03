@@ -69,82 +69,53 @@ export default function PortalLoginPage() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: 'linear-gradient(135deg, #060d1a 0%, #0a1525 50%, #060d1a 100%)' }}
-    >
-      {/* Background particle grid */}
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      {/* Subtle background pattern */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
+        <svg className="absolute inset-0 w-full h-full opacity-[0.025]" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="loginGrid" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#0e76ff" strokeWidth="0.5" />
+            <pattern id="loginGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#3b82f6" strokeWidth="0.8" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#loginGrid)" />
         </svg>
-        {/* Glow orb */}
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.06]"
-          style={{ background: 'radial-gradient(circle, #0e76ff 0%, transparent 70%)' }}
-        />
       </div>
 
-      {/* Login Card */}
       <div className="relative w-full max-w-[420px]">
-        <div
-          className="rounded-2xl p-8 md:p-10"
-          style={{
-            background: 'rgba(10, 18, 37, 0.85)',
-            border: '1px solid rgba(14, 118, 255, 0.18)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(14,118,255,0.08)',
-          }}
-        >
-          {/* Logo */}
+        {/* Login Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 md:p-10">
+          {/* Logo & Branding */}
           <div className="flex flex-col items-center mb-8">
-            <div className="relative w-12 h-12 mb-4">
-              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+            <div className="w-11 h-11 mb-4 bg-indigo-50 rounded-xl flex items-center justify-center border border-indigo-100">
+              <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
                 <defs>
                   <linearGradient id="loginLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#0e76ff" />
-                    <stop offset="100%" stopColor="#99c5ff" />
+                    <stop offset="0%" stopColor="#4f46e5" />
+                    <stop offset="100%" stopColor="#3b82f6" />
                   </linearGradient>
                 </defs>
                 <polygon points="16,2 28,16 16,30 4,16" fill="none" stroke="url(#loginLogoGrad)" strokeWidth="1.5" />
-                <polygon points="16,2 28,16 16,16" fill="rgba(14,118,255,0.15)" />
-                <polygon points="4,16 16,16 16,30" fill="rgba(153,197,255,0.1)" />
-                <line x1="16" y1="2" x2="16" y2="30" stroke="url(#loginLogoGrad)" strokeWidth="0.75" strokeDasharray="3 2" />
-                <line x1="4" y1="16" x2="28" y2="16" stroke="url(#loginLogoGrad)" strokeWidth="0.75" strokeDasharray="3 2" />
-                <circle cx="16" cy="16" r="2.5" fill="#0e76ff" />
+                <polygon points="16,2 28,16 16,16" fill="rgba(79,70,229,0.12)" />
+                <polygon points="4,16 16,16 16,30" fill="rgba(59,130,246,0.08)" />
+                <circle cx="16" cy="16" r="2.5" fill="#4f46e5" />
               </svg>
             </div>
-            <h1
-              className="text-[#f3f3f3] text-center"
-              style={{ fontFamily: "'Archivo', sans-serif", fontSize: '18px', fontWeight: 500, letterSpacing: '-0.01em' }}
-            >
+            <h1 className="text-gray-900 text-center text-lg font-semibold tracking-tight">
               Quantum World Ventures
             </h1>
-            <p
-              className="text-[#0e76ff] text-center mt-1"
-              style={{ fontFamily: "'Archivo Narrow', sans-serif", fontSize: '10px', fontWeight: 500, letterSpacing: '0.18em', textTransform: 'uppercase' }}
-            >
-              Portal Access
+            <p className="text-indigo-600 text-center mt-1 text-xs font-medium tracking-widest uppercase">
+              Research Portal
             </p>
           </div>
 
-          {/* Divider */}
-          <div className="h-px mb-8" style={{ background: 'linear-gradient(90deg, transparent, rgba(14,118,255,0.3), transparent)' }} />
+          <div className="h-px bg-gray-100 mb-8" />
 
           {/* Form */}
           <form onSubmit={handleLogin} className="space-y-5">
             {/* Email */}
             <div>
-              <label
-                htmlFor="email"
-                style={{ fontFamily: "'Archivo Narrow', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(243,243,243,0.55)' }}
-                className="block mb-2"
-              >
+              <label htmlFor="email" className="block mb-1.5 text-xs font-medium text-gray-600 uppercase tracking-wider">
                 Email / User ID
               </label>
               <input
@@ -155,25 +126,13 @@ export default function PortalLoginPage() {
                 placeholder="you@quantumworld.in"
                 required
                 autoComplete="email"
-                className="w-full px-4 py-3 rounded-lg text-[#f3f3f3] placeholder-[rgba(243,243,243,0.25)] outline-none transition-all duration-200"
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(243,243,243,0.1)',
-                  fontFamily: "'Archivo', sans-serif",
-                  fontSize: '14px',
-                }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(14,118,255,0.5)'; e.currentTarget.style.background = 'rgba(14,118,255,0.05)'; }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(243,243,243,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+                className="w-full px-4 py-2.5 rounded-lg text-gray-900 placeholder-gray-400 border border-gray-200 bg-white text-sm outline-none transition-all duration-150 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label
-                htmlFor="password"
-                style={{ fontFamily: "'Archivo Narrow', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(243,243,243,0.55)' }}
-                className="block mb-2"
-              >
+              <label htmlFor="password" className="block mb-1.5 text-xs font-medium text-gray-600 uppercase tracking-wider">
                 Password
               </label>
               <div className="relative">
@@ -185,20 +144,12 @@ export default function PortalLoginPage() {
                   placeholder="••••••••"
                   required
                   autoComplete="current-password"
-                  className="w-full px-4 py-3 pr-12 rounded-lg text-[#f3f3f3] placeholder-[rgba(243,243,243,0.25)] outline-none transition-all duration-200"
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(243,243,243,0.1)',
-                    fontFamily: "'Archivo', sans-serif",
-                    fontSize: '14px',
-                  }}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(14,118,255,0.5)'; e.currentTarget.style.background = 'rgba(14,118,255,0.05)'; }}
-                  onBlur={(e) => { e.currentTarget.style.borderColor = 'rgba(243,243,243,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+                  className="w-full px-4 py-2.5 pr-11 rounded-lg text-gray-900 placeholder-gray-400 border border-gray-200 bg-white text-sm outline-none transition-all duration-150 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[rgba(243,243,243,0.4)] hover:text-[rgba(243,243,243,0.7)] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
@@ -217,14 +168,11 @@ export default function PortalLoginPage() {
 
             {/* Error */}
             {error && (
-              <div
-                className="flex items-start gap-3 px-4 py-3 rounded-lg"
-                style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}
-              >
-                <svg className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+                <svg className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <p style={{ fontFamily: "'Archivo', sans-serif", fontSize: '13px', color: 'rgba(252,165,165,0.9)' }}>{error}</p>
+                <p className="text-sm text-red-700">{error}</p>
               </div>
             )}
 
@@ -232,18 +180,7 @@ export default function PortalLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 mt-2"
-              style={{
-                background: loading ? 'rgba(14,118,255,0.5)' : '#0e76ff',
-                color: '#ffffff',
-                fontFamily: "'Archivo Narrow', sans-serif",
-                fontSize: '12px',
-                fontWeight: 500,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                boxShadow: loading ? 'none' : '0 4px 20px rgba(14,118,255,0.3)',
-              }}
+              className="w-full py-2.5 rounded-lg font-medium text-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed transition-colors duration-150 flex items-center justify-center gap-2 mt-1 shadow-sm"
             >
               {loading ? (
                 <>
@@ -254,12 +191,7 @@ export default function PortalLoginPage() {
                   Signing in...
                 </>
               ) : (
-                <>
-                  Login
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </>
+                'Sign In'
               )}
             </button>
           </form>
@@ -268,37 +200,17 @@ export default function PortalLoginPage() {
           <div className="mt-5 text-center">
             <Link
               href="/portal/forgot-password"
-              style={{ fontFamily: "'Archivo Narrow', sans-serif", fontSize: '12px', color: 'rgba(14,118,255,0.8)', letterSpacing: '0.05em' }}
-              className="hover:text-[#0e76ff] transition-colors"
+              className="text-sm text-indigo-600 hover:text-indigo-800 transition-colors"
             >
-              Forgot Password?
+              Forgot password?
             </Link>
           </div>
-
-          {/* Footer note */}
-          <p
-            className="text-center mt-8"
-            style={{ fontFamily: "'Archivo Narrow', sans-serif", fontSize: '11px', color: 'rgba(243,243,243,0.25)', letterSpacing: '0.05em' }}
-          >
-            Access is restricted to authorized personnel only.
-            <br />
-            Contact your administrator to request access.
-          </p>
         </div>
 
-        {/* Back to main site */}
-        <div className="text-center mt-6">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 transition-colors"
-            style={{ fontFamily: "'Archivo Narrow', sans-serif", fontSize: '11px', color: 'rgba(243,243,243,0.35)', letterSpacing: '0.08em', textTransform: 'uppercase' }}
-          >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to main site
-          </Link>
-        </div>
+        {/* Footer note */}
+        <p className="text-center text-xs text-gray-400 mt-6">
+          Restricted access — authorized personnel only
+        </p>
       </div>
     </div>
   );
