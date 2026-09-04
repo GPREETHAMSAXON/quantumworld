@@ -130,8 +130,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const getUserProfile = async (): Promise<UserProfile | null> => {
-    if (!user) return null;
-    return fetchProfile(user.id);
+    const currentUser = await getCurrentUser();
+    if (!currentUser) return null;
+    return fetchProfile(currentUser.id);
   };
 
   const refreshProfile = async () => {

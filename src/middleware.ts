@@ -75,6 +75,19 @@ export async function middleware(request: NextRequest) {
       return supabaseResponse;
     }
 
+    // Set-password is reachable by any authenticated user regardless of
+    // account status — this is where an invited user lands after clicking
+    // their invite/reset email, before their status has a chance to become
+    // active.
+    if (pathname === '/portal/set-password') {
+      if (!user) {
+        const url = request.nextUrl.clone();
+        url.pathname = '/portal/login';
+        return NextResponse.redirect(url);
+      }
+      return supabaseResponse;
+    }
+
     // All other /portal/* routes require authentication
     if (!user) {
       const url = request.nextUrl.clone();
