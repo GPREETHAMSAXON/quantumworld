@@ -28,4 +28,8 @@ export const INTERN_ROUTES = {
 
 // Pages that actually exist. Everything else shows as "Soon" in the sidebar
 // and is a no-op click in the journey tracker until it's built.
-export const BUILT_INTERN_ROUTES = new Set<string>([INTERN_ROUTES.dashboard, INTERN_ROUTES.profilePersonal]);
+export const BUILT_INTERN_ROUTES = new Set<string>([
+  INTERN_ROUTES.dashboard,
+  INTERN_ROUTES.profilePersonal,
+  INTERN_ROUTES.researchArea,
+]);

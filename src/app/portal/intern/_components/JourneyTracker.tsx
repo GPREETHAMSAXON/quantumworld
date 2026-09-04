@@ -15,7 +15,7 @@ interface Stage {
 
 const STAGES: Stage[] = [
   { key: 'profile', label: 'Profile Complete', route: INTERN_ROUTES.profilePersonal, statuses: ['SELECTED', 'PROFILE_PENDING', 'PROFILE_COMPLETED'] },
-  { key: 'research', label: 'Research Area', route: INTERN_ROUTES.research, statuses: ['AREA_SELECTED', 'TOPIC_SELECTED'] },
+  { key: 'research', label: 'Research Area', route: INTERN_ROUTES.researchArea, statuses: ['AREA_SELECTED', 'TOPIC_SELECTED'] },
   {
     key: 'proposal',
     label: 'Proposal Approved',

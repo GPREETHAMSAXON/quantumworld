@@ -1,0 +1,78 @@
+import { createClient } from '@/lib/supabase/client';
+import { transitionInternshipTo, type InternshipStatus } from './stateMachine';
+
+export interface ResearchAreaState {
+  internshipId: string | null;
+  status: InternshipStatus | null;
+  primaryArea: string | null;
+  error: string | null;
+}
+
+/**
+ * Fetches the current intern's internship row (just the fields the research
+ * area selector needs). Mirrors the fetch pattern in internDashboard.ts.
+ */
+export async function getResearchAreaState(userId: string): Promise<ResearchAreaState> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('internships')
+    .select('id, status, primary_area')
+    .eq('intern_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    return { internshipId: null, status: null, primaryArea: null, error: error.message };
+  }
+  if (!data) {
+    return { internshipId: null, status: null, primaryArea: null, error: null };
+  }
+
+  return {
+    internshipId: data.id,
+    status: data.status as InternshipStatus,
+    primaryArea: data.primary_area,
+    error: null,
+  };
+}
+
+/**
+ * Saves the intern's chosen primary research area.
+ *
+ * - If the internship is still at PROFILE_COMPLETED, this advances it to
+ *   AREA_SELECTED in the same update (the one sequential forward step the
+ *   `validate_internship_status_transition` DB trigger allows), via the
+ *   shared state-machine service so the transition is validated the same
+ *   way everywhere else in the app.
+ * - If the internship is already at AREA_SELECTED (the intern is revisiting
+ *   to change their pick before topic selection is built), this just
+ *   updates primary_area without touching status — the trigger's
+ *   `OLD.status = NEW.status` no-op branch covers that.
+ * - Any other status is a caller error (the page guards against reaching
+ *   this before PROFILE_COMPLETED or after AREA_SELECTED).
+ */
+export async function saveResearchArea(
+  internshipId: string,
+  currentStatus: InternshipStatus,
+  area: string
+): Promise<{ success: boolean; status: InternshipStatus; error?: string }> {
+  if (currentStatus === 'PROFILE_COMPLETED') {
+    const result = await transitionInternshipTo(internshipId, 'AREA_SELECTED', { primary_area: area });
+    if (!result.success) {
+      return { success: false, status: currentStatus, error: result.error };
+    }
+    return { success: true, status: 'AREA_SELECTED' };
+  }
+
+  if (currentStatus === 'AREA_SELECTED') {
+    const supabase = createClient();
+    const { error } = await supabase.from('internships').update({ primary_area: area }).eq('id', internshipId);
+    if (error) return { success: false, status: currentStatus, error: error.message };
+    return { success: true, status: currentStatus };
+  }
+
+  return {
+    success: false,
+    status: currentStatus,
+    error: `Research area cannot be saved from status ${currentStatus}.`,
+  };
+}

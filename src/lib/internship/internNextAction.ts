@@ -28,14 +28,14 @@ const NEXT_ACTIONS: Record<InternshipStatus, NextAction> = {
     title: 'Choose your research area',
     description: 'Pick the primary research domain you want to work in.',
     ctaLabel: 'Continue',
-    ctaRoute: INTERN_ROUTES.research,
+    ctaRoute: INTERN_ROUTES.researchArea,
     waiting: false,
   },
   AREA_SELECTED: {
     title: 'Select your specific topic',
     description: 'Narrow your chosen area down to a specific research topic.',
     ctaLabel: 'Continue',
-    ctaRoute: INTERN_ROUTES.research,
+    ctaRoute: INTERN_ROUTES.researchTopic,
     waiting: false,
   },
   TOPIC_SELECTED: {
