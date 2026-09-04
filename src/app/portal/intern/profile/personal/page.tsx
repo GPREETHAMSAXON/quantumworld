@@ -3,11 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getInternProfileState, savePersonalSection, type PersonalDetails } from '@/lib/internship/internProfile';
+import { getIdentityRecord, type IdentityRecord } from '@/lib/internship/internIdentity';
 import PersonalSection from './_components/PersonalSection';
+import IdentitySection from './_components/IdentitySection';
 import PlaceholderSection from './_components/PlaceholderSection';
 
 const SECTIONS = ['Personal', 'Contact', 'Identity', 'Education', 'Skills'] as const;
 const TOTAL_SECTIONS = SECTIONS.length;
+const IDENTITY_INDEX = 2;
 
 export default function PersonalDetailsWizard() {
   const { user, profile } = useAuth();
@@ -15,18 +18,28 @@ export default function PersonalDetailsWizard() {
   const [loading, setLoading] = useState(true);
   const [personal, setPersonal] = useState<PersonalDetails | null>(null);
   const [personalDone, setPersonalDone] = useState(false);
+  const [identityRecord, setIdentityRecord] = useState<IdentityRecord | null>(null);
   const [banner, setBanner] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
-    getInternProfileState(user.id, profile?.full_name || '', profile?.email || '').then((state) => {
+
+    Promise.all([
+      getInternProfileState(user.id, profile?.full_name || '', profile?.email || ''),
+      getIdentityRecord(user.id),
+    ]).then(([profileState, identityState]) => {
       if (cancelled) return;
-      setPersonal(state.personal);
-      setPersonalDone(!!state.personalCompletedAt);
-      if (state.error) setBanner({ type: 'error', text: `Failed to load your profile: ${state.error}` });
+      setPersonal(profileState.personal);
+      setPersonalDone(!!profileState.personalCompletedAt);
+      setIdentityRecord(identityState.record);
+
+      const errors = [profileState.error, identityState.error].filter(Boolean);
+      if (errors.length > 0) setBanner({ type: 'error', text: `Failed to load your profile: ${errors[0]}` });
+
       setLoading(false);
     });
+
     return () => {
       cancelled = true;
     };
@@ -38,16 +51,14 @@ export default function PersonalDetailsWizard() {
     return () => clearTimeout(t);
   }, [banner]);
 
-  // Only "Personal" completion is tracked today — the other four sections
-  // will add their own completion source as each is built.
-  const completedFlags = [personalDone, false, false, false, false];
+  // Only "Personal" and "Identity" completion are tracked today — the
+  // remaining sections add their own completion source as each is built.
+  const completedFlags = [personalDone, false, !!identityRecord, false, false];
   const completedCount = completedFlags.filter(Boolean).length;
   const progressPercent = Math.round((completedCount / TOTAL_SECTIONS) * 100);
 
   if (loading || !personal || !user) {
-    return (
-      <div className="py-20 text-center text-xs text-gray-400 uppercase tracking-widest">Loading...</div>
-    );
+    return <div className="py-20 text-center text-xs text-gray-400 uppercase tracking-widest">Loading...</div>;
   }
 
   return (
@@ -114,7 +125,7 @@ export default function PersonalDetailsWizard() {
 
       {/* Section content */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        {activeIndex === 0 ? (
+        {activeIndex === 0 && (
           <PersonalSection
             userId={user.id}
             initial={personal}
@@ -125,7 +136,18 @@ export default function PersonalDetailsWizard() {
               setActiveIndex(1);
             }}
           />
-        ) : (
+        )}
+        {activeIndex === IDENTITY_INDEX && (
+          <IdentitySection
+            userId={user.id}
+            initialRecord={identityRecord}
+            onSubmitted={(record) => {
+              setIdentityRecord(record);
+              setBanner({ type: 'success', text: 'Identity document submitted for verification.' });
+            }}
+          />
+        )}
+        {activeIndex !== 0 && activeIndex !== IDENTITY_INDEX && (
           <PlaceholderSection
             label={SECTIONS[activeIndex]}
             onBack={() => setActiveIndex((i) => Math.max(0, i - 1))}
