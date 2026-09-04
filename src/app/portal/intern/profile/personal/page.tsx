@@ -5,25 +5,37 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getInternProfileState, savePersonalSection, type PersonalDetails } from '@/lib/internship/internProfile';
 import { getIdentityRecord, type IdentityRecord } from '@/lib/internship/internIdentity';
 import { getEducationState, saveEducation, type EducationDetails } from '@/lib/internship/internEducation';
+import { getContactState, saveContact, type ContactDetails } from '@/lib/internship/internContact';
+import { getSkillsState, saveSkills, type SkillsDetails } from '@/lib/internship/internSkills';
 import PersonalSection from './_components/PersonalSection';
 import IdentitySection from './_components/IdentitySection';
 import EducationSection from './_components/EducationSection';
-import PlaceholderSection from './_components/PlaceholderSection';
+import ContactSection from './_components/ContactSection';
+import SkillsSection from './_components/SkillsSection';
 
 const SECTIONS = ['Personal', 'Contact', 'Identity', 'Education', 'Skills'] as const;
 const TOTAL_SECTIONS = SECTIONS.length;
+const PERSONAL_INDEX = 0;
+const CONTACT_INDEX = 1;
 const IDENTITY_INDEX = 2;
 const EDUCATION_INDEX = 3;
+const SKILLS_INDEX = 4;
 
 export default function PersonalDetailsWizard() {
   const { user, profile } = useAuth();
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+
   const [personal, setPersonal] = useState<PersonalDetails | null>(null);
   const [personalDone, setPersonalDone] = useState(false);
   const [identityRecord, setIdentityRecord] = useState<IdentityRecord | null>(null);
   const [education, setEducation] = useState<EducationDetails | null>(null);
   const [educationDone, setEducationDone] = useState(false);
+  const [contact, setContact] = useState<ContactDetails | null>(null);
+  const [contactDone, setContactDone] = useState(false);
+  const [skills, setSkills] = useState<SkillsDetails | null>(null);
+  const [skillsDone, setSkillsDone] = useState(false);
+
   const [banner, setBanner] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
@@ -34,15 +46,23 @@ export default function PersonalDetailsWizard() {
       getInternProfileState(user.id, profile?.full_name || '', profile?.email || ''),
       getIdentityRecord(user.id),
       getEducationState(user.id),
-    ]).then(([profileState, identityState, educationState]) => {
+      getContactState(user.id),
+      getSkillsState(user.id),
+    ]).then(([profileState, identityState, educationState, contactState, skillsState]) => {
       if (cancelled) return;
       setPersonal(profileState.personal);
       setPersonalDone(!!profileState.personalCompletedAt);
       setIdentityRecord(identityState.record);
       setEducation(educationState.education);
       setEducationDone(!!educationState.completedAt);
+      setContact(contactState.contact);
+      setContactDone(!!contactState.completedAt);
+      setSkills(skillsState.skills);
+      setSkillsDone(!!skillsState.completedAt);
 
-      const errors = [profileState.error, identityState.error, educationState.error].filter(Boolean);
+      const errors = [profileState.error, identityState.error, educationState.error, contactState.error, skillsState.error].filter(
+        Boolean
+      );
       if (errors.length > 0) setBanner({ type: 'error', text: `Failed to load your profile: ${errors[0]}` });
 
       setLoading(false);
@@ -59,14 +79,11 @@ export default function PersonalDetailsWizard() {
     return () => clearTimeout(t);
   }, [banner]);
 
-  // Only "Personal", "Identity", and "Education" completion are tracked
-  // today — the remaining sections add their own completion source as each
-  // is built.
-  const completedFlags = [personalDone, false, !!identityRecord, educationDone, false];
+  const completedFlags = [personalDone, contactDone, !!identityRecord, educationDone, skillsDone];
   const completedCount = completedFlags.filter(Boolean).length;
   const progressPercent = Math.round((completedCount / TOTAL_SECTIONS) * 100);
 
-  if (loading || !personal || !education || !user) {
+  if (loading || !personal || !education || !contact || !skills || !user) {
     return <div className="py-20 text-center text-xs text-gray-400 uppercase tracking-widest">Loading...</div>;
   }
 
@@ -134,7 +151,7 @@ export default function PersonalDetailsWizard() {
 
       {/* Section content */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        {activeIndex === 0 && (
+        {activeIndex === PERSONAL_INDEX && (
           <PersonalSection
             userId={user.id}
             initial={personal}
@@ -142,7 +159,18 @@ export default function PersonalDetailsWizard() {
             onSaved={() => {
               setPersonalDone(true);
               setBanner({ type: 'success', text: 'Personal details saved.' });
-              setActiveIndex(1);
+              setActiveIndex(CONTACT_INDEX);
+            }}
+          />
+        )}
+        {activeIndex === CONTACT_INDEX && (
+          <ContactSection
+            initial={contact}
+            onSave={(fields) => saveContact(user.id, fields)}
+            onSaved={() => {
+              setContactDone(true);
+              setBanner({ type: 'success', text: 'Contact details saved.' });
+              setActiveIndex(IDENTITY_INDEX);
             }}
           />
         )}
@@ -153,6 +181,7 @@ export default function PersonalDetailsWizard() {
             onSubmitted={(record) => {
               setIdentityRecord(record);
               setBanner({ type: 'success', text: 'Identity document submitted for verification.' });
+              setActiveIndex(EDUCATION_INDEX);
             }}
           />
         )}
@@ -164,16 +193,22 @@ export default function PersonalDetailsWizard() {
             onSaved={() => {
               setEducationDone(true);
               setBanner({ type: 'success', text: 'Education details saved.' });
-              setActiveIndex(4);
+              setActiveIndex(SKILLS_INDEX);
             }}
           />
         )}
-        {activeIndex !== 0 && activeIndex !== IDENTITY_INDEX && activeIndex !== EDUCATION_INDEX && (
-          <PlaceholderSection
-            label={SECTIONS[activeIndex]}
-            onBack={() => setActiveIndex((i) => Math.max(0, i - 1))}
-            onNext={() => setActiveIndex((i) => Math.min(TOTAL_SECTIONS - 1, i + 1))}
-            isLast={activeIndex === TOTAL_SECTIONS - 1}
+        {activeIndex === SKILLS_INDEX && (
+          <SkillsSection
+            initial={skills}
+            onSave={(fields) => saveSkills(user.id, fields)}
+            onSaved={() => {
+              setSkillsDone(true);
+              const allDone = personalDone && contactDone && !!identityRecord && educationDone;
+              setBanner({
+                type: 'success',
+                text: allDone ? 'Skills saved — your profile is 100% complete!' : 'Skills saved.',
+              });
+            }}
           />
         )}
       </div>
