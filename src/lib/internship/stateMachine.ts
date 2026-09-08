@@ -38,6 +38,7 @@ export interface InternshipRecord {
   status: InternshipStatus;
   primary_area: string | null;
   specific_topic: string | null;
+  research_objective: string | null;
   proposal_title: string | null;
   proposal_abstract: string | null;
   proposal_objectives: string | null;

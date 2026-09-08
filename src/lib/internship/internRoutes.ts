@@ -32,4 +32,5 @@ export const BUILT_INTERN_ROUTES = new Set<string>([
   INTERN_ROUTES.dashboard,
   INTERN_ROUTES.profilePersonal,
   INTERN_ROUTES.researchArea,
+  INTERN_ROUTES.researchTopic,
 ]);

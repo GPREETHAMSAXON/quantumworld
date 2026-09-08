@@ -76,3 +76,81 @@ export async function saveResearchArea(
     error: `Research area cannot be saved from status ${currentStatus}.`,
   };
 }
+
+export interface ResearchTopicState {
+  internshipId: string | null;
+  status: InternshipStatus | null;
+  primaryArea: string | null;
+  specificTopic: string | null;
+  researchObjective: string | null;
+  error: string | null;
+}
+
+/**
+ * Fetches the fields the specific-topic selector needs: which area was
+ * chosen (to scope the checklist) plus any topic/objective already saved.
+ */
+export async function getResearchTopicState(userId: string): Promise<ResearchTopicState> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('internships')
+    .select('id, status, primary_area, specific_topic, research_objective')
+    .eq('intern_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    return { internshipId: null, status: null, primaryArea: null, specificTopic: null, researchObjective: null, error: error.message };
+  }
+  if (!data) {
+    return { internshipId: null, status: null, primaryArea: null, specificTopic: null, researchObjective: null, error: null };
+  }
+
+  return {
+    internshipId: data.id,
+    status: data.status as InternshipStatus,
+    primaryArea: data.primary_area,
+    specificTopic: data.specific_topic,
+    researchObjective: data.research_objective,
+    error: null,
+  };
+}
+
+/**
+ * Saves the intern's chosen specific topic + research objective. Same
+ * two-branch shape as saveResearchArea: advances AREA_SELECTED ->
+ * TOPIC_SELECTED on first save (the DB trigger's one allowed forward step),
+ * or just updates the fields in place while already at TOPIC_SELECTED.
+ */
+export async function saveResearchTopic(
+  internshipId: string,
+  currentStatus: InternshipStatus,
+  topic: string,
+  objective: string
+): Promise<{ success: boolean; status: InternshipStatus; error?: string }> {
+  if (currentStatus === 'AREA_SELECTED') {
+    const result = await transitionInternshipTo(internshipId, 'TOPIC_SELECTED', {
+      specific_topic: topic,
+      research_objective: objective || null,
+    });
+    if (!result.success) {
+      return { success: false, status: currentStatus, error: result.error };
+    }
+    return { success: true, status: 'TOPIC_SELECTED' };
+  }
+
+  if (currentStatus === 'TOPIC_SELECTED') {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from('internships')
+      .update({ specific_topic: topic, research_objective: objective || null })
+      .eq('id', internshipId);
+    if (error) return { success: false, status: currentStatus, error: error.message };
+    return { success: true, status: currentStatus };
+  }
+
+  return {
+    success: false,
+    status: currentStatus,
+    error: `Specific topic cannot be saved from status ${currentStatus}.`,
+  };
+}
