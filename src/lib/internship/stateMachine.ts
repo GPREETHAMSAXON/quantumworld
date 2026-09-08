@@ -53,6 +53,7 @@ export interface InternshipRecord {
   proposal_review_stage: 'awaiting_mentor' | 'revision_requested' | 'awaiting_admin' | 'approved' | null;
   proposal_recommended_at: string | null;
   proposal_recommended_by: string | null;
+  mentor_message: string | null;
   overall_progress_percent: number;
   created_at: string;
   updated_at: string;

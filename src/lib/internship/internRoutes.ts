@@ -34,4 +34,5 @@ export const BUILT_INTERN_ROUTES = new Set<string>([
   INTERN_ROUTES.researchArea,
   INTERN_ROUTES.researchTopic,
   INTERN_ROUTES.proposal,
+  INTERN_ROUTES.mentor,
 ]);

@@ -208,6 +208,26 @@ test('proposal review permissions and full revision/recommendation/approval life
       (await db.query('SELECT status FROM internships WHERE id = $1', [secondId])).rows[0].status,
       'PROPOSAL_APPROVED'
     );
+
+    await db.exec('RESET ROLE');
+    await db.exec(
+      fs.readFileSync('supabase/migrations/20260908170000_intern_mentor_assignment.sql', 'utf8')
+    );
+    await actor(intern);
+    const assignedMentorProfile = await db.query('SELECT full_name FROM profiles WHERE id = $1', [
+      mentor,
+    ]);
+    assert.equal(assignedMentorProfile.rows[0].full_name, 'Mentor');
+    await assert.rejects(
+      db.query("UPDATE internships SET mentor_message = 'Forged message' WHERE id = $1", [id]),
+      /Only the assigned mentor/
+    );
+    await actor(mentor);
+    await db.query(
+      "UPDATE internships SET mentor_message = 'Please revise the methodology section.' WHERE id = $1",
+      [id]
+    );
+    assert.equal((await row()).mentor_message, 'Please revise the methodology section.');
   } finally {
     await db.close();
   }
