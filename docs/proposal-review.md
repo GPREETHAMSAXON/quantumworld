@@ -31,6 +31,19 @@ the reviewed version, and retain the latest revision feedback and recommendation
 
 ## Verification
 
+After approval, the intern's row in Admin Intern Management offers **Assign Mentor**.
+The assignment screen ranks active mentors by expertise-tag match and shows their
+current intern count and capacity. Exact primary-area matches score 100%; other mentors
+score 0%. Matching ignores case and extra whitespace.
+
+Apply `20260908160000_assign_mentor.sql` before using assignment. The shared state-machine
+service sets `mentor_id` and advances `PROPOSAL_APPROVED` to `MENTOR_ASSIGNED` atomically.
+The database checks the admin role, active mentor account, and capacity under a mentor-row
+lock. Current counts include stages `MENTOR_ASSIGNED` through `ADMIN_APPROVED`; proposal
+review assignments and completed internships do not consume capacity. Assignment tests
+run with `node --test tests/assignMentor.test.cjs`; the database test below also covers
+assignment authorization, capacity rejection, and status persistence.
+
 Run `npm.cmd run build` and `node --test tests/internProposal.test.cjs`.
 Database tests use an isolated PostgreSQL runtime and a minimal schema fixture; they
 never connect to Supabase or execute the original destructive migrations.

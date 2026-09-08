@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import StatusBadge from '@/components/ui/StatusBadge';
 import Modal from '@/components/ui/Modal';
 import { createClient } from '@/lib/supabase/client';
@@ -429,6 +430,11 @@ export default function InternStatusPage() {
                     <td className="px-5 py-3.5 text-gray-500 text-xs">{formatDate(intern.createdAt)}</td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center justify-end gap-2">
+                        {intern.internshipStatus === 'PROPOSAL_APPROVED' && (
+                          <Link href={`/portal/admin/interns/${intern.id}/assign-mentor`} className="px-2.5 py-1.5 rounded-md text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 whitespace-nowrap">
+                            Assign Mentor
+                          </Link>
+                        )}
                         <button
                           type="button"
                           onClick={() => handleResetPassword(intern)}

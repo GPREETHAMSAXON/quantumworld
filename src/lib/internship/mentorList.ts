@@ -29,7 +29,7 @@ export interface MentorListResult {
 export async function getMentorList(): Promise<MentorListResult> {
   const supabase = createClient();
 
-  const [{ data: profiles, error: profilesError }, { data: internships }] = await Promise.all([
+  const [{ data: profiles, error: profilesError }, { data: internships, error: internshipsError }] = await Promise.all([
     supabase
       .from('profiles')
       .select('id, full_name, email, status, created_at, expertise, mentor_capacity')
@@ -41,6 +41,7 @@ export async function getMentorList(): Promise<MentorListResult> {
   if (profilesError || !profiles) {
     return { rows: [], error: profilesError?.message ?? 'Failed to load mentors.' };
   }
+  if (internshipsError) return { rows: [], error: internshipsError.message };
 
   const currentByMentor = new Map<string, number>();
   (internships ?? []).forEach((row: any) => {

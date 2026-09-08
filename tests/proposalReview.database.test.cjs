@@ -160,6 +160,54 @@ test('proposal review permissions and full revision/recommendation/approval life
       (await db.query('SELECT status FROM internships WHERE id = $1', [secondId])).rows[0].status,
       'PROPOSAL_APPROVED'
     );
+    // Assignment capacity uses the same active-mentee definition as mentor cards.
+    await db.exec('RESET ROLE');
+    await db.exec(
+      fs.readFileSync('supabase/migrations/20260904120000_mentor_profile_fields.sql', 'utf8')
+    );
+    await db.exec(fs.readFileSync('supabase/migrations/20260908160000_assign_mentor.sql', 'utf8'));
+    await db.exec(`GRANT UPDATE ON profiles TO authenticated;
+      CREATE POLICY admin_update_profile ON profiles FOR UPDATE TO authenticated
+      USING (is_portal_admin()) WITH CHECK (is_portal_admin());`);
+    await db.query('UPDATE profiles SET mentor_capacity = 1 WHERE id = $1', [mentor]);
+    await actor(intern);
+    await assert.rejects(
+      db.query("UPDATE internships SET status = 'MENTOR_ASSIGNED' WHERE id = $1", [id]),
+      /active admin/
+    );
+    await actor(admin);
+    await assert.rejects(
+      db.query(
+        "UPDATE internships SET status = 'MENTOR_ASSIGNED', mentor_id = NULL WHERE id = $1",
+        [id]
+      ),
+      /active mentor/
+    );
+    await db.query("UPDATE profiles SET status = 'disabled' WHERE id = $1", [outsider]);
+    await assert.rejects(
+      db.query("UPDATE internships SET status = 'MENTOR_ASSIGNED', mentor_id = $2 WHERE id = $1", [
+        id,
+        outsider,
+      ]),
+      /active mentor/
+    );
+    await db.query(
+      "UPDATE internships SET status = 'MENTOR_ASSIGNED', mentor_id = $2 WHERE id = $1",
+      [id, mentor]
+    );
+    assert.equal((await row()).status, 'MENTOR_ASSIGNED');
+    assert.equal((await row()).mentor_id, mentor);
+    await assert.rejects(
+      db.query("UPDATE internships SET status = 'MENTOR_ASSIGNED', mentor_id = $2 WHERE id = $1", [
+        secondId,
+        mentor,
+      ]),
+      /capacity/
+    );
+    assert.equal(
+      (await db.query('SELECT status FROM internships WHERE id = $1', [secondId])).rows[0].status,
+      'PROPOSAL_APPROVED'
+    );
   } finally {
     await db.close();
   }
