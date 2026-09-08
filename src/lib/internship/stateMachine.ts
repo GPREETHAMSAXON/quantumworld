@@ -54,6 +54,8 @@ export interface InternshipRecord {
   proposal_recommended_at: string | null;
   proposal_recommended_by: string | null;
   mentor_message: string | null;
+  project_started_at: string | null;
+  project_expected_completion_date: string | null;
   overall_progress_percent: number;
   created_at: string;
   updated_at: string;

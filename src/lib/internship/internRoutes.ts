@@ -14,7 +14,7 @@ export const INTERN_ROUTES = {
   proposal: '/portal/intern/proposal',
   mentor: '/portal/intern/mentor',
   project: '/portal/intern/project',
-  projectOverview: '/portal/intern/project/overview',
+  projectOverview: '/portal/intern/project',
   projectMilestones: '/portal/intern/project/milestones',
   projectTasks: '/portal/intern/project/tasks',
   projectProgressReports: '/portal/intern/project/progress-reports',
@@ -35,4 +35,5 @@ export const BUILT_INTERN_ROUTES = new Set<string>([
   INTERN_ROUTES.researchTopic,
   INTERN_ROUTES.proposal,
   INTERN_ROUTES.mentor,
+  INTERN_ROUTES.project,
 ]);
