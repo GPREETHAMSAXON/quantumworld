@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import StatusBadge from '@/components/ui/StatusBadge';
 
@@ -157,6 +158,9 @@ export default function MentorDashboard() {
         </div>
 
         {/* Mentor Actions */}
+        <Link href="/portal/mentor/proposals" className="mb-6 flex items-center justify-between rounded-xl border border-indigo-200 bg-white p-5 text-sm font-medium text-indigo-700 hover:bg-indigo-50">
+          Review Project Proposals <span aria-hidden="true">→</span>
+        </Link>
         <div>
           <h2 className="text-xs font-medium text-gray-500 uppercase tracking-widest mb-4">Mentor Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

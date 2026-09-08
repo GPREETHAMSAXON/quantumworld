@@ -10,6 +10,14 @@ export const PROPOSAL_FIELDS = [
 ] as const;
 export type ProposalFields = Record<(typeof PROPOSAL_FIELDS)[number][0], string>;
 export const PROPOSAL_BUCKET = 'proposal-documents';
+export function canEditProposal(record: InternshipRecord): boolean {
+  return (
+    record.status === 'TOPIC_SELECTED' ||
+    record.status === 'PROPOSAL_DRAFT' ||
+    (record.status === 'PROPOSAL_REVISION' &&
+      (!record.proposal_review_stage || record.proposal_review_stage === 'revision_requested'))
+  );
+}
 const MIME_TYPES: Record<string, string> = {
   pdf: 'application/pdf',
   docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -39,7 +47,7 @@ export async function saveProposal(
   file: File | null,
   submit: boolean
 ): Promise<InternshipRecord> {
-  if (!['TOPIC_SELECTED', 'PROPOSAL_DRAFT', 'PROPOSAL_REVISION'].includes(record.status))
+  if (!canEditProposal(record))
     throw new Error('This proposal is no longer editable. Reload to see its current status.');
   if (submit && PROPOSAL_FIELDS.some(([key]) => !fields[key].trim()))
     throw new Error('Complete all five proposal fields before submitting.');
@@ -86,6 +94,7 @@ export async function saveProposal(
       .update(payload)
       .eq('id', current.id)
       .eq('status', current.status)
+      .eq('updated_at', current.updated_at)
       .select()
       .single();
     if (error) throw new Error(error.message);

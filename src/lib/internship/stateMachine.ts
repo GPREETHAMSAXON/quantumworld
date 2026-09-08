@@ -1,7 +1,7 @@
 /**
  * Internship State Machine Service
  *
- * Enforces forward-only, sequential status transitions for the internships table.
+ * Enforces forward-only status transitions, including recommended proposal approval.
  * Use `advanceInternshipStatus` (or the typed helpers below) instead of writing
  * raw status updates anywhere in the codebase.
  */
@@ -50,6 +50,9 @@ export interface InternshipRecord {
   proposal_submitted_at: string | null;
   proposal_revision_notes: string | null;
   proposal_approved_at: string | null;
+  proposal_review_stage: 'awaiting_mentor' | 'revision_requested' | 'awaiting_admin' | 'approved' | null;
+  proposal_recommended_at: string | null;
+  proposal_recommended_by: string | null;
   overall_progress_percent: number;
   created_at: string;
   updated_at: string;
@@ -81,10 +84,35 @@ export function getNextStatus(current: InternshipStatus): InternshipStatus | nul
 }
 
 /**
- * Returns true if transitioning from `from` to `to` is a valid single-step forward move.
+ * Returns true for a sequential move or the guarded proposal approval edge.
  */
 export function isValidTransition(from: InternshipStatus, to: InternshipStatus): boolean {
+  // A recommendation may proceed directly to final admin approval without a revision.
+  // The database additionally requires the recommendation and an active admin.
+  if (from === 'PROPOSAL_SUBMITTED' && to === 'PROPOSAL_APPROVED') return true;
   return getStatusIndex(to) === getStatusIndex(from) + 1;
+}
+
+/** Atomic review decision; the database checks role, assignment and the reviewed version. */
+export async function reviewProposal(
+  internshipId: string,
+  expectedUpdatedAt: string,
+  decision: 'request_revision' | 'recommend' | 'approve',
+  feedback = ''
+): Promise<InternshipRecord> {
+  if (decision === 'request_revision' && !feedback.trim()) {
+    throw new Error('Enter feedback explaining the required revisions.');
+  }
+  const { data, error } = await createClient().rpc('review_project_proposal', {
+    p_internship_id: internshipId,
+    p_expected_updated_at: expectedUpdatedAt,
+    p_decision: decision,
+    p_feedback: feedback.trim(),
+  });
+  if (error) throw new Error(error.message);
+  const record = Array.isArray(data) ? data[0] : data;
+  if (!record?.id) throw new Error('Review was not saved. Refresh the proposal and try again.');
+  return record as InternshipRecord;
 }
 
 /**

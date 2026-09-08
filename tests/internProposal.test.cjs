@@ -172,3 +172,19 @@ test('file validation accepts PDF/DOCX and rejects invalid or oversized files', 
     /10 MB/
   );
 });
+
+test('resubmitted and recommended revisions are locked until another revision request', async () => {
+  const ctx = loadService('PROPOSAL_REVISION');
+  for (const stage of ['awaiting_mentor', 'awaiting_admin', 'approved']) {
+    const record = { ...ctx.record(), proposal_review_stage: stage };
+    assert.equal(ctx.service.canEditProposal(record), false);
+    await assert.rejects(
+      ctx.service.saveProposal(record, fields, file, false),
+      /no longer editable/
+    );
+  }
+  assert.equal(
+    ctx.service.canEditProposal({ ...ctx.record(), proposal_review_stage: 'revision_requested' }),
+    true
+  );
+});

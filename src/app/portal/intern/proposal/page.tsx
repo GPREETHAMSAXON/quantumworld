@@ -13,6 +13,7 @@ import {
   saveProposal,
   validateProposalFile,
   PROPOSAL_BUCKET,
+  canEditProposal,
   PROPOSAL_FIELDS,
   type ProposalFields,
 } from '@/lib/internship/internProposal';
@@ -62,8 +63,7 @@ export default function ProjectProposalPage() {
     };
   }, [user]);
 
-  const editable =
-    !!record && ['TOPIC_SELECTED', 'PROPOSAL_DRAFT', 'PROPOSAL_REVISION'].includes(record.status);
+  const editable = !!record && canEditProposal(record);
   function chooseFiles(files: FileList | null) {
     if (!editable || busy || !files?.length) return;
     setMessage(null);
@@ -156,13 +156,17 @@ export default function ProjectProposalPage() {
         ? 'PROPOSAL_DRAFT'
         : record.status;
   const label =
-    badge === 'PROPOSAL_APPROVED'
-      ? 'Approved'
-      : badge === 'PROPOSAL_SUBMITTED'
+    record.proposal_review_stage === 'awaiting_admin'
+      ? 'Awaiting Admin Review'
+      : record.proposal_review_stage === 'awaiting_mentor'
         ? 'Submitted'
-        : badge === 'PROPOSAL_REVISION'
-          ? 'Revision'
-          : 'Draft';
+        : badge === 'PROPOSAL_APPROVED'
+          ? 'Approved'
+          : badge === 'PROPOSAL_SUBMITTED'
+            ? 'Submitted'
+            : badge === 'PROPOSAL_REVISION'
+              ? 'Revision'
+              : 'Draft';
 
   return (
     <div className="max-w-4xl space-y-5">
@@ -203,7 +207,9 @@ export default function ProjectProposalPage() {
       )}
       {record.status === 'PROPOSAL_REVISION' && (
         <div className="rounded-lg border border-orange-200 bg-orange-50 p-4 text-sm text-orange-800">
-          <p className="font-medium">Revision requested</p>
+          <p className="font-medium">
+            {editable ? 'Revision requested' : 'Previous revision feedback'}
+          </p>
           <p className="mt-1 whitespace-pre-wrap">
             {record.proposal_revision_notes ||
               'Update your proposal and submit the revised version for review.'}
