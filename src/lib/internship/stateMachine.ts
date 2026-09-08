@@ -44,6 +44,9 @@ export interface InternshipRecord {
   proposal_objectives: string | null;
   proposal_methodology: string | null;
   proposal_timeline: string | null;
+  proposal_expected_outcome: string | null;
+  proposal_document_path: string | null;
+  proposal_document_name: string | null;
   proposal_submitted_at: string | null;
   proposal_revision_notes: string | null;
   proposal_approved_at: string | null;
@@ -168,6 +171,7 @@ export async function advanceInternshipStatus(
     .from('internships')
     .update(updatePayload)
     .eq('id', internshipId)
+    .eq('status', currentStatus)
     .select()
     .single();
 
@@ -222,6 +226,7 @@ export async function transitionInternshipTo(
     .from('internships')
     .update(updatePayload)
     .eq('id', internshipId)
+    .eq('status', currentStatus)
     .select()
     .single();
 
